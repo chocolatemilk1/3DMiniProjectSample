@@ -37,6 +37,17 @@ public sealed class HelicopterRotorWash : MonoBehaviour
     [Min(0f)] public float dustPerSecond = 65f;
     [Min(0.1f)] public float dustLifetime = 2f;
 
+    [Header("Rotor spin")]
+    public bool spinRotors = true;
+    [Min(0)] public int firstRotorId = 12;
+    [Min(0)] public int lastRotorId = 27;
+    [Tooltip("Axis in each rotor object's local space.")]
+    public Vector3 rotorAxis = Vector3.up;
+    [Tooltip("Rotation speed in degrees per second.")]
+    public float rotorDegreesPerSecond = 720f;
+    public bool reverseRotorDirection;
+    public bool useUnscaledRotorTime;
+
     private ParticleSystem[] discoveredParticles = Array.Empty<ParticleSystem>();
     private ParticleSystem.Particle[] buffer = Array.Empty<ParticleSystem.Particle>();
     private RaycastHit[] groundHits = new RaycastHit[16];
@@ -45,13 +56,67 @@ public sealed class HelicopterRotorWash : MonoBehaviour
     private float nextDiscovery;
     private float dustRemainder;
     private bool legacyTuningMigrated;
+    private Transform[] rotorTargets = Array.Empty<Transform>();
+    private bool warnedMissingRotors;
 
     private void OnEnable()
     {
         MigrateLegacySceneInstance();
+        FindRotorTargets();
         nextDiscovery = 0f;
         if (dust != null)
             dust.Play();
+    }
+
+    private void Update()
+    {
+        if (!spinRotors)
+            return;
+        if (rotorTargets == null || rotorTargets.Length == 0)
+            FindRotorTargets();
+        if (rotorTargets.Length == 0)
+            return;
+
+        Vector3 axis = rotorAxis.sqrMagnitude > 0.0001f ? rotorAxis.normalized : Vector3.up;
+        float deltaTime = useUnscaledRotorTime ? Time.unscaledDeltaTime : Time.deltaTime;
+        float angle = rotorDegreesPerSecond * (reverseRotorDirection ? -1f : 1f) * deltaTime;
+        foreach (var rotor in rotorTargets)
+        {
+            if (rotor != null)
+                rotor.Rotate(axis, angle, Space.Self);
+        }
+    }
+
+    private void FindRotorTargets()
+    {
+        Transform root = helicopterRoot != null ? helicopterRoot : transform.root;
+        var found = new System.Collections.Generic.List<Transform>();
+        foreach (var candidate in root.GetComponentsInChildren<Transform>(true))
+        {
+            if (!TryGetRotorId(candidate.name, out int id) || id < firstRotorId || id > lastRotorId)
+                continue;
+            if (!found.Contains(candidate))
+                found.Add(candidate);
+        }
+
+        rotorTargets = found.ToArray();
+        if (rotorTargets.Length == 0 && !warnedMissingRotors)
+        {
+            warnedMissingRotors = true;
+            Debug.LogWarning($"Helicopter Rotor Wash found no ID{firstRotorId}inst-ID{lastRotorId}inst objects.", this);
+        }
+    }
+
+    private static bool TryGetRotorId(string objectName, out int id)
+    {
+        id = 0;
+        const string prefix = "ID";
+        const string suffix = "inst";
+        if (!objectName.StartsWith(prefix) || !objectName.EndsWith(suffix))
+            return false;
+
+        string number = objectName.Substring(prefix.Length, objectName.Length - prefix.Length - suffix.Length);
+        return int.TryParse(number, out id);
     }
 
     private void MigrateLegacySceneInstance()
