@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 41217f4dcfc53e747bdaf8d923304a7a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 348816
+  packageName: Snow effects
+  packageVersion: 1.0
+  assetPath: Assets/Hovl Studio/Snow VFX/Prefabs/Built in render pipeline/Snow light
+    NoGround.prefab
+  uploadId: 829908

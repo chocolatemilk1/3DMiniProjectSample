@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 05f986712fb64d679bfb74dd7c8ac921
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - dustShader: {fileID: 4800000, guid: 799ee72cff834b94b7e09db126670282, type: 3}
+  executionOrder: 100
+  icon: {instanceID: 0}
+  userData:
+  assetBundleName:
+  assetBundleVariant:

@@ -1,0 +1,7 @@
+fileFormatVersion: 2
+guid: 94c3da9b27d44e79aee35c67943ac33f
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - trailMaterial: {fileID: 2100000, guid: b0b1794e244744a69cd5a9b87117fe64, type: 2}
+  executionOrder: 200
